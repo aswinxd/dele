@@ -11,30 +11,41 @@ app = Client("media_delete_bot", api_id=api_id, api_hash=api_hash, bot_token=bot
 # Dictionary to keep track of media messages count per chat
 media_count = {}
 
-# Function to check if the message contains media
-def is_media(message):
-    return message.photo or message.video or message.document or message.audio or message.voice or message.animation
+# Function to check if the bot has admin privileges
+async def is_bot_admin(client, chat_id):
+    member = await client.get_chat_member(chat_id, "me")
+    return member.can_delete_messages
 
 # Handler for media messages
 @app.on_message(filters.media)
-def handle_media(client, message):
+async def handle_media(client, message):
     chat_id = message.chat.id
-    
+
+    # Check if bot has admin privileges in the chat
+    if not await is_bot_admin(client, chat_id):
+        print(f"Bot is not an admin in chat {chat_id}, can't delete messages.")
+        return
+
     # Initialize media count for the chat if not already set
     if chat_id not in media_count:
         media_count[chat_id] = 0
-    
+
     # Increment the media message count
     media_count[chat_id] += 1
 
     # Check if 10 media messages have been sent
     if media_count[chat_id] >= 10:
-        # Delete the message
-        app.delete_messages(chat_id, message.message_id)
+        try:
+            # Delete the message
+            await client.delete_messages(chat_id, message.message_id)
+            print(f"Deleted media message {message.message_id} in chat {chat_id}")
+        except RPCError as e:
+            print(f"Failed to delete message {message.message_id}: {e}")
+        
         # Reset the media count
         media_count[chat_id] = 0
-
-    print(f"Media count in chat {chat_id}: {media_count[chat_id]}")
+    else:
+        print(f"Media count in chat {chat_id}: {media_count[chat_id]}")
 
 # Start the bot
 app.run()
