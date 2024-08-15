@@ -14,24 +14,20 @@ app = Client("media_delete_bot", api_id=api_id, api_hash=api_hash, bot_token=bot
 media_count = {}
 
 # Function to check if the bot has admin privileges with delete permission
+# Function to check if the bot has admin privileges with delete permission
 async def is_bot_admin(client, chat_id):
     try:
         member = await client.get_chat_member(chat_id, "me")
         print(f"Bot's status in chat {chat_id}: {member.status}")
         
         # Print member details for debugging
-        print(f"Bot privileges: {member}")
+        print(f"Bot privileges: {member.privileges}")
         
-        # Check if the bot is an admin or owner
-        if member.status in ("administrator", "owner"):
-            if hasattr(member, 'privileges'):
-                print(f"Can bot delete messages? {member.privileges.can_delete_messages}")
-                return member.privileges.can_delete_messages
-            else:
-                print(f"Assuming bot can delete messages (no explicit privileges)")
-                return True
+        # Check if the bot has the "can_delete_messages" privilege
+        if hasattr(member, 'privileges') and member.privileges.can_delete_messages:
+            return True
         else:
-            print(f"Bot is not an admin or owner in chat {chat_id}")
+            print(f"Bot cannot delete messages in chat {chat_id}.")
             return False
     except RPCError as e:
         print(f"Failed to retrieve member info for chat {chat_id}: {e}")
