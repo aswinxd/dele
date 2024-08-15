@@ -1,6 +1,6 @@
 import os
 from pyrogram import Client, filters
-#from pyrogram.types import ChatMemberAdministrator, ChatMemberOwner
+from pyrogram.enums import ChatMemberAdministrator, ChatMemberOwner
 from pyrogram.errors import RPCError
 
 # Initialize the bot
