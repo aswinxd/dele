@@ -15,12 +15,27 @@ media_count = {}
 
 # Function to check if the bot has admin privileges with delete permission
 async def is_bot_admin(client, chat_id):
-    member = await client.get_chat_member(chat_id, "me")
-    
-    # Check if the bot is an admin or owner
-    if member.status in ("administrator", "owner"):
-        return member.privileges.can_delete_messages if hasattr(member, 'privileges') else True
-    return False
+    try:
+        member = await client.get_chat_member(chat_id, "me")
+        print(f"Bot's status in chat {chat_id}: {member.status}")
+        
+        # Print member details for debugging
+        print(f"Bot privileges: {member}")
+        
+        # Check if the bot is an admin or owner
+        if member.status in ("administrator", "owner"):
+            if hasattr(member, 'privileges'):
+                print(f"Can bot delete messages? {member.privileges.can_delete_messages}")
+                return member.privileges.can_delete_messages
+            else:
+                print(f"Assuming bot can delete messages (no explicit privileges)")
+                return True
+        else:
+            print(f"Bot is not an admin or owner in chat {chat_id}")
+            return False
+    except RPCError as e:
+        print(f"Failed to retrieve member info for chat {chat_id}: {e}")
+        return False
 
 # Handler for media messages
 @app.on_message(filters.media)
