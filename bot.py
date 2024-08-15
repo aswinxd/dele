@@ -10,14 +10,16 @@ bot_token = "7202657465:AAEq59opThMwH-i2rLMpurRL9y1F43MgOdw"  # Replace with you
 
 app = Client("media_delete_bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 
-# Dictionary to keep track of media messages count per chat
+# Function to check if the bot has admin privileges and can delete messages
 media_count = {}
 
-# Function to check if the bot has admin privileges and can delete messages
+# Function to check if the bot has admin privileges with delete permission
 async def is_bot_admin(client, chat_id):
     member = await client.get_chat_member(chat_id, "me")
-    if isinstance(member, (ChatMemberAdministrator, ChatMemberOwner)):
-        return member.privileges.can_delete_messages
+    
+    # Check if the bot is an admin or owner
+    if member.status in ("administrator", "owner"):
+        return member.privileges.can_delete_messages if hasattr(member, 'privileges') else True
     return False
 
 # Handler for media messages
@@ -43,7 +45,7 @@ async def handle_media(client, message):
             # Delete the message
             await client.delete_messages(chat_id, message.message_id)
             print(f"Deleted media message {message.message_id} in chat {chat_id}")
-        except RPCError as e:
+        except Exception as e:
             print(f"Failed to delete message {message.message_id}: {e}")
         
         # Reset the media count
