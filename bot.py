@@ -13,10 +13,12 @@ app = Client("media_delete_bot", api_id=api_id, api_hash=api_hash, bot_token=bot
 # Dictionary to keep track of media messages count per chat
 media_count = {}
 
-# Function to check if the bot has admin privileges
+# Function to check if the bot has admin privileges and can delete messages
 async def is_bot_admin(client, chat_id):
     member = await client.get_chat_member(chat_id, "me")
-    return member.can_delete_messages
+    if isinstance(member, (ChatMemberAdministrator, ChatMemberOwner)):
+        return member.privileges.can_delete_messages
+    return False
 
 # Handler for media messages
 @app.on_message(filters.media)
