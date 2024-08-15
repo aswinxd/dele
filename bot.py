@@ -1,5 +1,7 @@
 import os
 from pyrogram import Client, filters
+from pyrogram.types import ChatMemberAdministrator, ChatMemberOwner
+from pyrogram.errors import RPCError
 
 # Initialize the bot
 api_id = "12799559"  # Replace with your API ID
